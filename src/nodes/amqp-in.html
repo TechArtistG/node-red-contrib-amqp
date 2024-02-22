@@ -35,6 +35,11 @@
         types: ['json'],
       })
 
+      $('#node-input-exchangeRoutingKey').typedInput({
+        type: 'str', // default type
+        types: ['str', 'env'], // allowed types
+      })
+
       $('#node-input-exchangeType').change(function (e) {
         const exchangeType = this.value
 
