@@ -27,6 +27,11 @@ Please see the `Node Help` section from within node-red for more info
 
 ### Build the project
 
+Note you will need to install rimraf, typescript and @types/node:
+npm install rimraf -g
+npm install typescript -g
+npm install @types/node -g
+
 ```
 npm run build
 ```
