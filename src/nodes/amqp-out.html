@@ -6,6 +6,7 @@
       name: { value: '' },
       broker: { value: '', type: 'amqp-broker' },
       exchangeName: { value: '' },
+      exchangeNameType: { value: 'str' },
       exchangeType: { value: 'topic' },
       exchangeRoutingKey: { value: '' },
       exchangeRoutingKeyType: { value: 'str' },
@@ -32,8 +33,14 @@
     oneditprepare: function () {
       $("#node-input-exchangeRoutingKey").typedInput({
         default: "str",
-        types: ["str", "msg", "flow", "global", "jsonata"],
+        types: ["str", "msg", "flow", "global", "env","jsonata"],
         typeField: $("#node-input-exchangeRoutingKeyType")
+      })
+
+      $('#node-input-exchangeName').typedInput({
+        default: "str",
+        types: ['str', 'env'], // allowed types
+        typeField: $("#node-input-exchangeNameType")
       })
 
       $('#node-input-amqpProperties').typedInput({
@@ -100,7 +107,7 @@
 
 <script type="text/html" data-template-name="amqp-out">
   <div class="form-row">
-    <label for="node-input-name"><i class="fa fa-tag"></i>&nbsp;&nbsp;名称</label>
+    <label for="node-input-name"><i class="fa fa-tag"></i>&nbsp;&nbsp;Name</label>
     <input type="text" id="node-input-name" placeholder="Leave blank to use exchange name">
   </div>
   <div class="form-row">
@@ -124,7 +131,8 @@
   </div>
   <div class="form-row wide-label-amqp-out">
     <label for="node-input-exchangeName"><i class="fa fa-tag"></i>&nbsp;&nbsp;Exchange Name</label>
-    <input type="text" class="simple-input" id="node-input-exchangeName" placeholder="Leave blank for the default exchange">
+    <input type="text" id="node-input-exchangeName" placeholder="Leave blank for the default exchange">
+    <input type="hidden" id="node-input-exchangeNameType" />
   </div>
   <div class="form-row wide-label-amqp-out routing-key-form-input">
     <label for="node-input-exchangeRoutingKey"><i class="fa fa-filter"></i>&nbsp;&nbsp;Routing Key</label>

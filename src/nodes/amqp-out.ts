@@ -7,6 +7,8 @@ import { MessageProperties } from 'amqplib'
 module.exports = function (RED: NodeRedApp): void {
   function AmqpOut(
     config: EditorNodeProperties & {
+      exchangeName: string
+      exchangeNameType: string
       exchangeRoutingKey: string
       exchangeRoutingKeyType: string
       amqpProperties: string
@@ -46,6 +48,8 @@ module.exports = function (RED: NodeRedApp): void {
           self.on('input', async (msg, _, done) => {
             const { payload, routingKey, properties: msgProperties } = msg
             const {
+              exchangeName,
+              exchangeNameType,
               exchangeRoutingKey,
               exchangeRoutingKeyType,
               amqpProperties,
@@ -62,10 +66,29 @@ module.exports = function (RED: NodeRedApp): void {
               properties = msgProperties
             }
 
+            // Set Exchange Name
+            switch (exchangeNameType) {
+              case 'env':
+                amqp.setExchangeName(
+                  RED.util.evaluateNodeProperty(
+                    exchangeName,
+                    exchangeNameType,
+                    self,
+                    msg,
+                  ),
+                )
+                break
+              case 'str':
+                amqp.setExchangeName(exchangeName)
+                break
+            }
+
+            // Set RoutingKey
             switch (exchangeRoutingKeyType) {
               case 'msg':
               case 'flow':
               case 'global':
+              case 'env':
                 amqp.setRoutingKey(
                   RED.util.evaluateNodeProperty(
                     exchangeRoutingKey,

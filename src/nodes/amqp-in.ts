@@ -4,7 +4,16 @@ import { ErrorType, NodeType } from '../types'
 import Amqp from '../Amqp'
 
 module.exports = function (RED: NodeRedApp): void {
-  function AmqpIn(config: EditorNodeProperties): void {
+  function AmqpIn(
+    config: EditorNodeProperties & {
+      exchangeName: string
+      exchangeNameType: string
+      exchangeRoutingKey: string
+      exchangeRoutingKeyType: string
+      queueName: string
+      queueNameType: string
+    },
+    ): void {
     let reconnectTimeout: NodeJS.Timeout
     RED.events.once('flows:stopped', () => {
       clearTimeout(reconnectTimeout)
@@ -32,9 +41,69 @@ module.exports = function (RED: NodeRedApp): void {
       try {
         const connection = await amqp.connect()
 
+        const {
+          exchangeName,
+          exchangeNameType,
+          exchangeRoutingKey,
+          exchangeRoutingKeyType,
+          queueName,
+          queueNameType,
+        } = config
+
+        // Set Exchange Name
+        switch (exchangeNameType) {
+          case 'env':
+            amqp.setExchangeName(
+              RED.util.evaluateNodeProperty(
+                exchangeName,
+                exchangeNameType,
+                self,
+                {},
+              ),
+            )
+            break
+          case 'str':
+            amqp.setExchangeName(exchangeName)
+            break
+        }
+
+        // Set RoutingKey
+        switch (exchangeRoutingKeyType) {
+          case 'env':
+            amqp.setRoutingKey(
+              RED.util.evaluateNodeProperty(
+                exchangeRoutingKey,
+                exchangeRoutingKeyType,
+                self,
+                {},
+              ),
+            )
+            break
+          case 'str':
+            amqp.setRoutingKey(exchangeRoutingKey)
+            break
+        }
+
+        // Set Queue Name
+        switch (queueNameType) {
+          case 'env':
+            amqp.setRoutingKey(
+              RED.util.evaluateNodeProperty(
+                queueName,
+                queueNameType,
+                self,
+                {},
+              ),
+            )
+            break
+          case 'str':
+            amqp.setRoutingKey(queueName)
+            break
+        }
+
         // istanbul ignore else
         if (connection) {
-          await amqp.initialize()
+          await amqp.initialize() // <-- exchange must be set before this call
           await amqp.consume()
 
           // When the node is re-deployed

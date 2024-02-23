@@ -8,10 +8,13 @@
       prefetch: { value: 0 },
       noAck: { value: true },
       exchangeName: { value: '' },
+      exchangeNameType: { value: 'str' },
       exchangeType: { value: 'topic' },
       exchangeRoutingKey: { value: '' },
+      exchangeRoutingKeyType: { value: 'str' },
       exchangeDurable: { value: true },
       queueName: { value: '' },
+      queueNameType: { value: 'str' },
       queueExclusive: { value: true },
       queueDurable: { value: false },
       queueAutoDelete: { value: true },
@@ -36,8 +39,21 @@
       })
 
       $('#node-input-exchangeRoutingKey').typedInput({
-        type: 'str', // default type
+        default: "str",
         types: ['str', 'env'], // allowed types
+        typeField: $("#node-input-exchangeRoutingKeyType")
+      })
+
+      $('#node-input-exchangeName').typedInput({
+        default: "str",
+        types: ['str', 'env'], // allowed types
+        typeField: $("#node-input-exchangeNameType")
+      })
+
+      $('#node-input-queueName').typedInput({
+        default: "str",
+        types: ['str', 'env'], // allowed types
+        typeField: $("#node-input-queueNameType")
       })
 
       $('#node-input-exchangeType').change(function (e) {
@@ -104,10 +120,12 @@
   <div class="form-row wide-label-amqp-in">
     <label for="node-input-exchangeName" style="width: 30%"><i class="fa fa-tag"></i>&nbsp;&nbsp;Exchange Name</label>
     <input type="text" id="node-input-exchangeName" placeholder="Leave blank for the default exchange">
+    <input type="hidden" id="node-input-exchangeNameType" />
   </div>
   <div class="form-row wide-label-amqp-in routing-key-form-input">
     <label for="node-input-exchangeRoutingKey"><i class="fa fa-filter"></i>&nbsp;&nbsp;Routing Key</label>
     <input type="text" id="node-input-exchangeRoutingKey">
+    <input type="hidden" id="node-input-exchangeRoutingKeyType" />
   </div>
   <div class="form-tips routing-key-form-input">
     <i class="fa fa-info-circle"></i>
@@ -128,6 +146,7 @@
   <div class="form-row wide-label-amqp-in">
     <label for="node-input-queueName"><i class="fa fa-tag"></i>&nbsp;&nbsp;Queue Name</label>
     <input type="text" id="node-input-queueName" placeholder="Leave blank to auto-generate">
+    <input type="hidden" id="node-input-queueNameType" />
   </div>
 
   <div class="form-row">

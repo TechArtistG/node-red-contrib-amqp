@@ -117,6 +117,14 @@ export default class Amqp {
     this.config.exchange.routingKey = newRoutingKey
   }
 
+  public setExchangeName(newExchangeName: string): void {
+    this.config.exchange.name = newExchangeName
+  }
+
+  public setQueueName(newQueueName: string): void {
+    this.config.queue.name = newQueueName
+  }
+
   public ack(msg: AssembledMessage): void {
     const allUpTo = !!msg.manualAck?.allUpTo
     this.channel.ack(msg, allUpTo)
