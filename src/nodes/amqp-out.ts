@@ -22,10 +22,48 @@ module.exports = function (RED: NodeRedApp): void {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     RED.nodes.createNode(this, config)
+    
+    /*if(config.exchangeNameType == 'env'){
+      config.exchangeName = RED.util.evaluateNodeProperty(
+        config.exchangeName,
+        config.exchangeNameType,
+        this,
+        {},
+      ) 
+    }*/
+
     this.status(NODE_STATUS.Disconnected)
     const amqp = new Amqp(RED, this, config)
+    //var amqp:Amqp
 
     ;(async function initializeNode(self): Promise<void> {
+      const {
+        exchangeName,
+        exchangeNameType,
+        exchangeRoutingKey,
+        exchangeRoutingKeyType,
+        amqpProperties,
+      } = config
+
+
+      // Set Exchange Name
+      switch (exchangeNameType) {
+        case 'env':
+          amqp.setExchangeName(
+            RED.util.evaluateNodeProperty(
+              exchangeName,
+              exchangeNameType,
+              self,
+              {},
+            ),
+          )
+          break
+        case 'str':
+          amqp.setExchangeName(exchangeName)
+          break
+      }
+      //amqp = new Amqp(RED, self, config)
+
       const reconnect = () =>
         new Promise<void>(resolve => {
           reconnectTimeout = setTimeout(async () => {
@@ -41,19 +79,22 @@ module.exports = function (RED: NodeRedApp): void {
       try {
         const connection = await amqp.connect()
 
-        // istanbul ignore else
+        // istanbul ignore else        
         if (connection) {
+          
+          
+
           await amqp.initialize()
 
           self.on('input', async (msg, _, done) => {
             const { payload, routingKey, properties: msgProperties } = msg
-            const {
+            /*const {
               exchangeName,
               exchangeNameType,
               exchangeRoutingKey,
               exchangeRoutingKeyType,
               amqpProperties,
-            } = config
+            } = config*/
 
             // message properties override config properties
             let properties: MessageProperties
@@ -65,7 +106,7 @@ module.exports = function (RED: NodeRedApp): void {
             } catch (e) {
               properties = msgProperties
             }
-
+            
             // Set Exchange Name
             switch (exchangeNameType) {
               case 'env':

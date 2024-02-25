@@ -86,6 +86,11 @@ export default class Amqp {
     return this.connection
   }
 
+  /*public async initializeWithExchange(newExchangeName: string): Promise<void> {
+    this.setExchangeName(newExchangeName)
+    await this.initialize()
+  }*/
+
   public async initialize(): Promise<void> {
     await this.createChannel()
     await this.assertExchange()

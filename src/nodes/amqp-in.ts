@@ -21,11 +21,51 @@ module.exports = function (RED: NodeRedApp): void {
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
+
     RED.nodes.createNode(this, config)
     this.status(NODE_STATUS.Disconnected)
-    const amqp = new Amqp(RED, this, config)
 
-    ;(async function initializeNode(self): Promise<void> {
+    if(config.exchangeNameType == 'env'){
+      config.exchangeName = RED.util.evaluateNodeProperty(
+        config.exchangeName,
+        config.exchangeNameType,
+        this,
+        {},
+      ) 
+    }
+
+    const amqp = new Amqp(RED, this, config)
+    //var amqp:Amqp
+
+    ;(async function initializeNode(self): Promise<void> {      
+      self.warn(`================ AmqpIn initializeNode ================`)     
+
+      const {
+        exchangeName,
+        exchangeNameType,
+        exchangeRoutingKey,
+        exchangeRoutingKeyType,
+        queueName,
+        queueNameType,
+      } = config      
+
+      switch (exchangeNameType) {
+        case 'env':
+          config.exchangeName = RED.util.evaluateNodeProperty(
+            exchangeName,
+            exchangeNameType,
+            self,
+            {}
+          )          
+          break
+        case 'str':
+        default:
+          config.exchangeName = exchangeName          
+          break
+      }
+
+      //amqp = new Amqp(RED, self, config)
+
       const reconnect = () =>
         new Promise<void>(resolve => {
           reconnectTimeout = setTimeout(async () => {
@@ -41,14 +81,25 @@ module.exports = function (RED: NodeRedApp): void {
       try {
         const connection = await amqp.connect()
 
-        const {
+        /*const {
           exchangeName,
           exchangeNameType,
           exchangeRoutingKey,
           exchangeRoutingKeyType,
           queueName,
           queueNameType,
-        } = config
+        } = config*/
+        /*
+        self.warn(`AmqpIn: RoutingKey: ${exchangeRoutingKey}`);
+        self.warn(`AmqpIn: RoutingKey Type: ${exchangeRoutingKeyType}`);
+        self.warn(`AmqpIn: Evaluated RoutingKey: ${RED.util.evaluateNodeProperty(exchangeRoutingKey, exchangeRoutingKeyType, self, {})}`)
+
+
+        self.warn(`AmqpIn: Queue Name: ${queueName}`);
+        self.warn(`AmqpIn: Queue Name Type: ${queueNameType}`);
+        self.warn(`AmqpIn: Evaluated Queue Name: ${RED.util.evaluateNodeProperty(queueName, queueNameType, self, {})}`)
+        */
+
 
         // Set Exchange Name
         switch (exchangeNameType) {
@@ -58,8 +109,8 @@ module.exports = function (RED: NodeRedApp): void {
                 exchangeName,
                 exchangeNameType,
                 self,
-                {},
-              ),
+                {}
+              )
             )
             break
           case 'str':
@@ -75,11 +126,20 @@ module.exports = function (RED: NodeRedApp): void {
                 exchangeRoutingKey,
                 exchangeRoutingKeyType,
                 self,
+                {}
+              )
+            )
+            break
+          case 'jsonata':
+            amqp.setRoutingKey(
+              RED.util.evaluateJSONataExpression(
+                RED.util.prepareJSONataExpression(exchangeRoutingKey, self),
                 {},
               ),
             )
             break
           case 'str':
+          default:
             amqp.setRoutingKey(exchangeRoutingKey)
             break
         }
@@ -87,17 +147,26 @@ module.exports = function (RED: NodeRedApp): void {
         // Set Queue Name
         switch (queueNameType) {
           case 'env':
-            amqp.setRoutingKey(
+            amqp.setQueueName(
               RED.util.evaluateNodeProperty(
                 queueName,
                 queueNameType,
                 self,
+                {}
+              )
+            )
+            break
+          case 'jsonata':
+            amqp.setQueueName(
+              RED.util.evaluateJSONataExpression(
+                RED.util.prepareJSONataExpression(queueName, self),
                 {},
               ),
             )
             break
           case 'str':
-            amqp.setRoutingKey(queueName)
+          default:
+            amqp.setQueueName(queueName)
             break
         }
 
