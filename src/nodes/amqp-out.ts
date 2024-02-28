@@ -21,16 +21,7 @@ module.exports = function (RED: NodeRedApp): void {
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    RED.nodes.createNode(this, config)
-    
-    /*if(config.exchangeNameType == 'env'){
-      config.exchangeName = RED.util.evaluateNodeProperty(
-        config.exchangeName,
-        config.exchangeNameType,
-        this,
-        {},
-      ) 
-    }*/
+    RED.nodes.createNode(this, config)    
 
     this.status(NODE_STATUS.Disconnected)
     const amqp = new Amqp(RED, this, config)
@@ -80,22 +71,13 @@ module.exports = function (RED: NodeRedApp): void {
         const connection = await amqp.connect()
 
         // istanbul ignore else        
-        if (connection) {
-          
-          
+        if (connection) {          
 
           await amqp.initialize()
 
           self.on('input', async (msg, _, done) => {
             const { payload, routingKey, properties: msgProperties } = msg
-            /*const {
-              exchangeName,
-              exchangeNameType,
-              exchangeRoutingKey,
-              exchangeRoutingKeyType,
-              amqpProperties,
-            } = config*/
-
+           
             // message properties override config properties
             let properties: MessageProperties
             try {

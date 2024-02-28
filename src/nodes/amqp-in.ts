@@ -25,6 +25,7 @@ module.exports = function (RED: NodeRedApp): void {
     RED.nodes.createNode(this, config)
     this.status(NODE_STATUS.Disconnected)
 
+    // Need to resolve exchangeName before amqp init
     if(config.exchangeNameType == 'env'){
       config.exchangeName = RED.util.evaluateNodeProperty(
         config.exchangeName,
@@ -34,8 +35,7 @@ module.exports = function (RED: NodeRedApp): void {
       ) 
     }
 
-    const amqp = new Amqp(RED, this, config)
-    //var amqp:Amqp
+    const amqp = new Amqp(RED, this, config)  
 
     ;(async function initializeNode(self): Promise<void> {      
       self.warn(`================ AmqpIn initializeNode ================`)     
@@ -64,8 +64,6 @@ module.exports = function (RED: NodeRedApp): void {
           break
       }
 
-      //amqp = new Amqp(RED, self, config)
-
       const reconnect = () =>
         new Promise<void>(resolve => {
           reconnectTimeout = setTimeout(async () => {
@@ -80,26 +78,6 @@ module.exports = function (RED: NodeRedApp): void {
 
       try {
         const connection = await amqp.connect()
-
-        /*const {
-          exchangeName,
-          exchangeNameType,
-          exchangeRoutingKey,
-          exchangeRoutingKeyType,
-          queueName,
-          queueNameType,
-        } = config*/
-        /*
-        self.warn(`AmqpIn: RoutingKey: ${exchangeRoutingKey}`);
-        self.warn(`AmqpIn: RoutingKey Type: ${exchangeRoutingKeyType}`);
-        self.warn(`AmqpIn: Evaluated RoutingKey: ${RED.util.evaluateNodeProperty(exchangeRoutingKey, exchangeRoutingKeyType, self, {})}`)
-
-
-        self.warn(`AmqpIn: Queue Name: ${queueName}`);
-        self.warn(`AmqpIn: Queue Name Type: ${queueNameType}`);
-        self.warn(`AmqpIn: Evaluated Queue Name: ${RED.util.evaluateNodeProperty(queueName, queueNameType, self, {})}`)
-        */
-
 
         // Set Exchange Name
         switch (exchangeNameType) {
